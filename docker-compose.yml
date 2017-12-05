@@ -1,0 +1,36 @@
+version: '2'
+services:
+    backend:
+        build: ctf_backend/
+        volumes:
+            - ./ctf_backend:/app
+        environment:
+            - WORK_ENV=DEV
+            - SECRET_KEY=!2if5x!j=ue+#t4*p&ba@sf)2nn0ep*6q-08a$xn@9%nv$ycan
+            - SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://docker:docker@database/ctf
+        links:
+            - database
+        restart: always
+        ports:
+            - 8000:8000
+    frontend:
+        build: frontend/
+        restart: always
+        ports:
+            - 9000:9000
+    proxy:
+        build: proxy/src
+        ports:
+            - "80:80"
+        depends_on:
+            - backend
+            - frontend
+        links:
+            - backend
+            - frontend
+        volumes:
+            - ./proxy/src:/etc/nginx/sites-available/
+    database:
+        build: database/
+        ports:
+            - "25434:5432"
